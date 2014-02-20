@@ -2,80 +2,96 @@
 
 <div class="title"><span><%= @fr_index.year %> FR Index</span></div>
 
-<div id="fr-index-metadata" class="page_summary">
-  <h1><%= @fr_index.year %> Federal Register Index</h1>
-
-  <hr />
-
-  <p>
-    This index provides descriptive entries and Federal Register page numbers
-    for documents published in the daily Federal Register. It includes entries, 
-    with select metadata for all documents published in the <%= @fr_index.year %> calendar year.
-  </p>
-
-  <p>
-    Each agency below is followed by a count that represents the number of articles for 
-    that agency in the <%= @fr_index.year %> FR Index. The count is omitted for agency publishing 
-    less than 2 articles in a given year.
-  </p>
-
-  <p>This online index is current as of <strong><%= @fr_index.max_date.strftime("%B %e, %Y") %></strong>.</p>
-
-  <% if @fr_index.last_published %>
-    <p>
-      <%= link_to "Download Approved #{@fr_index.last_published.to_s(:month_year)} Index (PDF)", @fr_index.published_pdf_path, :class => "pdf_link" %>
-    </p>
-  <% end %>
-
-  <p id="agency-jump-nav">
-    Jump to Agencies: <%= @fr_index.agencies_by_letter.map{|letter,agencies| "<a href='##{letter}' class='letter_link'>#{letter}</a>"}.join(' | ') %>
-  <p>
-
-</div>
-
-<div class="index_agencies">
-  <% @fr_index.agencies_by_letter.each do |letter, agency_years| %>
-    <h3 id="<%= letter %>">
-      <%= letter %>
-      <a href="#fr-index-metadata">back to top</a>
-    </h3>
+<% html5_tag(:aside, :id => :left_sidebar) do %>
+  <nav>
+    <h4>FR Index Years</h4>
     <ul>
-    <% agency_years.each do |agency_year| %>
-      <% if agency_year.respond_to?(:see_instead) %> 
+      <% FrIndexPresenter.available_years.each do |year| %>
         <li>
-          <%= agency_year.name %>
-          <ul>
-            <li>
-              <em class="see">see</em> 
-              <%= link_to "#{agency_year.see_instead.name} ", "#agency_#{agency_year.see_instead.id}", :class => "agency_reference"  %>
-            </li>
-          </ul>
-        </li>
-      <% else %>
-        <li>
-        <%= link_to agency_year.name, index_year_agency_path(@fr_index.year, agency_year), :id => "agency_#{agency_year.agency.id}" %>
-          <%= count_pill(agency_year.entry_count, "data-tooltip" => "Articles published in #{@fr_index.year}") %>
-          <% if agency_year.children.present? %>
-          <ul>
-            <% agency_year.children.each do |sub_agency| %>
-              <% if sub_agency.respond_to?(:see_instead) %>
-                <li>
-                  <em class="see">See</em> 
-                  <%= link_to "#{sub_agency.see_instead.name} ", "#agency_#{sub_agency.see_instead.id}", :class => "agency_reference"  %>
-                </li>
-              <% else %>
-                <li>
-                  <span class="see">See</span> 
-                  <%= link_to sub_agency.name, index_year_agency_path(@fr_index.year, sub_agency), :id => "agency_#{sub_agency.agency.id}" %>
-                  <%= count_pill(sub_agency.entry_count, "data-tooltip" => "Articles published in #{@fr_index.year}") %>
-                </li>
-              <% end %>
-            <% end %>
-          </ul>
-          <% end %>
+          <%= link_to_unless_current "#{year}", index_year_path(year) %>
+          <%= "<strong>&lt;&lt;</strong>".html_safe if @fr_index.year == year %>
         </li>
       <% end %>
-    <% end %>
     </ul>
-  <% end %>
-</div>
+  </nav>
+<% end %>
+
+<% html5_tag(:section, :id => :content_area) do %>
+  <div id="fr-index-metadata" class="page_summary">
+    <h1><%= @fr_index.year %> Federal Register Index</h1>
+
+    <hr />
+
+    <p>
+      This index provides descriptive entries and Federal Register page numbers
+      for documents published in the daily Federal Register. It includes entries, 
+      with select metadata for all documents published in the <%= @fr_index.year %> calendar year.
+    </p>
+
+    <p>
+      Each agency below is followed by a count that represents the number of articles for 
+      that agency in the <%= @fr_index.year %> FR Index. The count is omitted for agency publishing 
+      less than 2 articles in a given year.
+    </p>
+
+    <p>This online index is current as of <strong><%= @fr_index.max_date.strftime("%B %e, %Y") %></strong>.</p>
+
+    <% if @fr_index.last_published %>
+      <p>
+        <%= link_to "Download Approved #{@fr_index.last_published.to_s(:month_year)} Index (PDF)", @fr_index.published_pdf_path, :class => "pdf_link" %>
+      </p>
+    <% end %>
+
+    <p id="agency-jump-nav">
+      Jump to Agencies: <%= @fr_index.agencies_by_letter.map{|letter,agencies| "<a href='##{letter}' class='letter_link'>#{letter}</a>"}.join(' | ') %>
+    <p>
+
+  </div>
+
+  <div class="index_agencies" id="public_index">
+    <% @fr_index.agencies_by_letter.each do |letter, agency_years| %>
+      <h3 id="<%= letter %>">
+        <%= letter %>
+        <a href="#fr-index-metadata">back to top</a>
+      </h3>
+      <ul>
+      <% agency_years.each do |agency_year| %>
+        <% if agency_year.respond_to?(:see_instead) %> 
+          <li>
+            <%= agency_year.name %>
+            <ul>
+              <li>
+                <em class="see">see</em> 
+                <%= link_to "#{agency_year.see_instead.name} ", "#agency_#{agency_year.see_instead.id}", :class => "agency_reference"  %>
+              </li>
+            </ul>
+          </li>
+        <% else %>
+          <li>
+          <%= link_to agency_year.name, index_year_agency_path(@fr_index.year, agency_year), :id => "agency_#{agency_year.agency.id}" %>
+            <%= count_pill(agency_year.entry_count, "data-tooltip" => "Articles published in #{@fr_index.year}") %>
+            <% if agency_year.children.present? %>
+            <ul>
+              <% agency_year.children.each do |sub_agency| %>
+                <% if sub_agency.respond_to?(:see_instead) %>
+                  <li>
+                    <em class="see">See</em> 
+                    <%= link_to "#{sub_agency.see_instead.name} ", "#agency_#{sub_agency.see_instead.id}", :class => "agency_reference"  %>
+                  </li>
+                <% else %>
+                  <li>
+                    <span class="see">See</span> 
+                    <%= link_to sub_agency.name, index_year_agency_path(@fr_index.year, sub_agency), :id => "agency_#{sub_agency.agency.id}" %>
+                    <%= count_pill(sub_agency.entry_count, "data-tooltip" => "Articles published in #{@fr_index.year}") %>
+                  </li>
+                <% end %>
+              <% end %>
+            </ul>
+            <% end %>
+          </li>
+        <% end %>
+      <% end %>
+      </ul>
+    <% end %>
+  </div>
+<% end %>
