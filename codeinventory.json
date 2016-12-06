@@ -1,0 +1,16 @@
+﻿{
+  "name": "FederalRegister.gov Ruby API Client",
+  "description": "A Ruby API Client for FederalRegister.gov that handles searching articles and getting information about agencies",
+  "license": "https://github.com/usnationalarchives/federal_register/commit/26a79489cbb01cde74d284dc9d1298bada3b846f",
+  "openSourceProject": 1,
+  "governmentWideReuseProject": 1,
+  "tags": [
+    "NARA",
+    "API",
+    "Ruby",
+    "FederalRegister"
+  ],
+  "contact": {
+    "email": "leslie.johnston@nara.gov"
+  }
+}
